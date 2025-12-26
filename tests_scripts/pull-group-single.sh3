@@ -1,0 +1,281 @@
+#!/bin/bash
+
+SCRIPTDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd )"
+
+if ! $SCRIPTDIR/repo-valid.sh '.'; then
+    exit 1
+fi
+
+git_commit_message() {
+
+    local LOCAL=$1
+    local EMAIL=$2
+    local sub_group_id=$3
+    local curr_group_state=$4
+    local local_refname=$5
+
+    ssh-add .git/.author-cb/key 1>/dev/null 2>/dev/null
+    PARENTS=""
+    for refs in `git show-ref | grep -iE "refs/(heads|remotes)/groupConv/$sub_group_id/[a-zA-Z0-9]+'" | awk '{print $1}'`; do
+        PARENTS+="-p $refs "
+    done
+    NEW_COMMIT_MSG="MERGE_OPS()"
+    pubKeyCommitHash=$(echo $NEW_COMMIT_MSG | 
+        GIT_COMMITTER_NAME="$LOCAL" \
+        GIT_AUTHOR_NAME="$LOCAL" \
+        GIT_COMMITTER_EMAIL="$EMAIL" \
+        GIT_AUTHOR_EMAIL="$EMAIL" \
+        git commit-tree $curr_group_state $PARENTS) 
+    git update-ref $local_refname $pubKeyCommitHash
+}
+
+merge_groups() {
+
+    mili=1000000000
+    start=$(date +%s%N)
+
+    local LOCAL=$1
+    local EMAIL=$2
+    local remotes_local_ref=$3
+    local local_refname=$4
+    local sub_group_id=$5
+
+    curr_group_state=`git show -s --no-show-signature $remotes_local_ref --format='%T'`
+    group_id=`git cat-file -p $curr_group_state | grep tree | awk '{print $4}'`
+    group_name=`git cat-file -p $curr_group_state:group_name`
+    old_stree=$curr_group_state
+    new_stree=$curr_group_state
+    
+    # Acquiring lock on db.csv file so it doesn't corrupt 
+    exec 200>.git/.author-cb/db.csv.lock
+    flock -x 200  # Acquire lock
+
+    # Check if local ref is present
+    if [[ -z `git show-ref "$local_refname"` ]]; then 
+        # echo "local not found: $sub_group_id"
+        # echo "Pulled first time. Creating direct merge commit."
+        git_commit_message $LOCAL $EMAIL $sub_group_id $curr_group_state $local_refname
+        group_present=`cat .git/.author-cb/db.csv | grep -nE "$group_id,"`
+        # echo "group_present: $group_present"
+        NUM_GRP_MEM=`git cat-file -p  $curr_group_state:$group_id | wc -l`
+        FIRST="true"
+        if [[ -z $group_present ]]; then 
+            CSV_INFO="$group_id,$group_name,"",$curr_group_state,remote"
+            echo $CSV_INFO >> .git/.author-cb/db.csv
+        fi
+    else
+
+        # local_latest_group_tree=`git log --no-show-signature -n 1 $local_refname --format='%T'`    
+        # remote_latest_group_tree=`git show --no-show-signature -s $remote_commit_hash --format='%T'`
+
+        local_latest_group_tree=`git show --no-show-signature -s $local_refname --format='%T'`
+        remote_latest_group_tree=`git show --no-show-signature -s $remotes_local_ref --format='%T'`
+
+        # echo "local_latest_group_tree: $local_latest_group_tree, remote_latest_group_tree: $remote_latest_group_tree"
+        FIRST="false"
+        old_stree=$local_latest_group_tree
+        new_stree=$remote_latest_group_tree
+        # Compare tree and merge
+        if [[ "$local_latest_group_tree" != "$remote_latest_group_tree" ]]; then
+            ans=`$SCRIPTDIR/../_5_merge_group_state/target/release/merge_group_state $local_latest_group_tree $remote_latest_group_tree`
+            new_group_state_tree=`echo $ans | awk -F, '{print $1}'`
+            # if [[ "$local_latest_group_tree" == "$new_group_state_tree" ]]; then
+            #     echo "Nothing to do!!"
+            #     # retrun
+            # else 
+            curr_group_state=$new_group_state_tree
+
+            # echo "new current group state: $curr_group_state"
+            # # Create merge commit
+            git_commit_message $LOCAL $EMAIL $sub_group_id $curr_group_state $local_refname
+
+            group_info_in_local=`cat .git/.author-cb/db.csv | grep -nE "^$sub_group_id"`
+            row_num=`echo $group_info_in_local | awk -F':' '{print $1}'`
+            curr_group_name=`echo $group_info_in_local | awk -F, '{print $2}'`
+            old_group_name=`echo $group_info_in_local | awk -F, '{print $3}'`
+            created_at=`echo $group_info_in_local | awk -F, '{print $5}'`
+
+            # echo "row number: $row_num"
+            if [[ "$group_name" != "$curr_group_name" ]]; then
+                old_group_name=$curr_group_name
+                curr_group_name=$group_name
+            fi
+            CSV_INFO="$group_id,$curr_group_name,$old_group_name,$curr_group_state,$created_at"
+            # echo "$CSV_INFO ---- in rowNum: $row_num"
+            sed -i "${row_num}s/.*/$CSV_INFO/" .git/.author-cb/db.csv
+            # fi
+        fi
+    fi  
+    # Releasing lock
+    flock -u 200    # unlock (optional)
+    exec 200>&-     # close FD 200
+    # echo "push_from:$who_pushed,time:$res,no_mem:$NUM_GRP_MEM,first:$FIRST"
+
+    end=$(date +%s%N)
+    diff=$(($end-$start))
+    res=$(echo "scale=10; $diff/$mili" | bc)
+    echo "old_tree:$old_stree,new_tree:$new_stree,merge_time:$res,first:$FIRST"
+}
+
+
+LOCAL=`cat .git/.author-cb/git-cb`
+EMAIL="$LOCAL@unibas.ch"
+sha_pubkey=`cat .git/.author-cb/key.pub | sha1sum | awk '{print $1}'`
+
+REMOTE=$1
+if [[ -z $REMOTE ]];then
+    echo "Please provide remote name as arg 2."
+    exit 1
+fi
+
+if [[ "$LOCAL" == "$REMOTE" ]]; then 
+    echo "Please provide the remote name to push. Not the local name"
+    exit 1
+fi
+
+REMOTE_EXISTS=`git remote show $REMOTE 2> /dev/null 1>/dev/null; echo $?`
+
+if [[ $REMOTE_EXISTS -ne 0 ]]; then 
+    echo "$REMOTE does not exists."
+    exit 1
+fi
+
+remote_head_ref=`git ls-remote $REMOTE refs/heads/groupConv/*`
+
+while IFS= read -r commit_refs; do 
+    
+    remote_commit_hash=`echo ${commit_refs:0:40}`
+    refsp=`echo ${commit_refs:41}`
+    # echo "$refsp"
+    sub_group_id=`echo $refsp | cut -d'/' -f 4`
+    remote_pubkey=`echo $refsp | cut -d'/' -f 5`
+
+    remotes_local_ref=""
+    local_refname=""
+
+    # echo "in heads"
+    remotes_local_ref="refs/remotes/groupConv/$sub_group_id/$remote_pubkey"
+    local_refname="refs/heads/groupConv/$sub_group_id/$sha_pubkey"
+    
+    output=$(unbuffer git -c core.progress=true fetch --progress "$REMOTE" "+$refsp:$remotes_local_ref" 2>&1)
+    # output=$(GIT_PROGRESS_DELAY=0 \
+    #     git -c pack.useStderr=false \
+    #         -c core.progress=true \
+    #         fetch --progress "$REMOTE" "+$refsp:$remotes_local_ref" 2>&1)
+    
+    result=$(merge_groups $LOCAL $EMAIL $remotes_local_ref $local_refname $sub_group_id)
+    some_res=$result
+    # total_output=$'Heads:\n'"$output"$'\n'"Trees:$result"$'\n'
+    total_output=$'Heads:\n'"$output"$'\n\nTrees:\n'"$result"$'\n\n'
+    # total_output=$'Heads:\n'"$output"$'\n\n'"$result"$'\n\n'
+
+done <<< $remote_head_ref
+
+echo $total_output
+echo "xxxxxxxxxxxxxxxxxxxxx"
+
+# echo $remote_head_ref
+total_output=""
+remote_remote_refs=`git ls-remote $REMOTE refs/remotes/groupConv/*`
+
+while IFS= read -r commit_refs ; do
+
+    if [[ -z $commit_refs ]];then
+        echo "empty"
+        break
+    fi
+
+    remote_commit_hash=`echo ${commit_refs:0:40}`
+    
+    refsp=`echo ${commit_refs:41}`
+    
+    sub_group_id=`echo $refsp | cut -d'/' -f 4`
+    remote_pubkey=`echo $refsp | cut -d'/' -f 5`
+
+    remotes_local_ref=""
+    local_refname=""
+
+    # echo "in heads"
+    remotes_local_ref="refs/remotes/groupConv/$sub_group_id/$remote_pubkey"
+    local_refname="refs/heads/groupConv/$sub_group_id/$sha_pubkey"
+    
+    if [[ $refsp != *"$sha_pubkey"* ]]; then
+        # echo "in remotes"
+        remotes_local_ref=$refsp
+        local_refname=$refsp
+
+        output=$(unbuffer git -c core.progress=true fetch --progress "$REMOTE" "+$refsp:$remotes_local_ref" 2>&1)
+        # output=$(GIT_PROGRESS_DELAY=0 \
+        #     git -c pack.useStderr=false \
+        #         -c core.progress=true \
+        #         fetch --progress "$REMOTE" "+$refsp:$remotes_local_ref" 2>&1)
+        
+        # total_output="$total_output\nRemotes:\n$output"
+        total_output="$total_output"$'\n'"Remotes:"$'\n'"$output"
+    fi
+done <<< $remote_remote_refs
+
+echo $total_output
+# remote_refs=`git ls-remote $REMOTE */groupConv*`
+# total_output=""
+# some_res=""
+# while IFS= read -r commit_refs ; do
+
+#     remote_commit_hash=`echo ${commit_refs:0:40}`
+#     refsp=`echo ${commit_refs:41}`
+
+#     sub_group_id=`echo $refsp | cut -d'/' -f 4`
+#     remote_pubkey=`echo $refsp | cut -d'/' -f 5`
+
+#     remotes_local_ref=""
+#     local_refname=""
+#     # echo "refsp: $refsp"
+#     if [[ $refsp == "refs/heads"* ]];then
+#         # echo "in heads"
+#         remotes_local_ref="refs/remotes/groupConv/$sub_group_id/$remote_pubkey"
+#         local_refname="refs/heads/groupConv/$sub_group_id/$sha_pubkey"
+        
+#         output=$(unbuffer git -c core.progress=true fetch --progress "$REMOTE" "+$refsp:$remotes_local_ref" 2>&1)
+#         # output=$(GIT_PROGRESS_DELAY=0 \
+#         #     git -c pack.useStderr=false \
+#         #         -c core.progress=true \
+#         #         fetch --progress "$REMOTE" "+$refsp:$remotes_local_ref" 2>&1)
+        
+#         result=$(merge_groups $LOCAL $EMAIL $remotes_local_ref $local_refname $sub_group_id)
+#         some_res=$result
+#         # total_output=$'Heads:\n'"$output"$'\n'"Trees:$result"$'\n'
+#         # total_output=$'Heads:\n'"$output"$'\n\nTrees:\n'"$result"$'\n\n'
+#         total_output=$'Heads:\n'"$output"$'\n'"$result"$'\n\n'
+        
+#     else 
+#         if [[ $refsp != *"$sha_pubkey"* ]]; then
+#             # echo "in remotes"
+#             remotes_local_ref=$refsp
+#             local_refname=$refsp
+
+#             if [[ $refsp =~ refs/remotes/groupConv/ ]];then
+#                 output=$(unbuffer git -c core.progress=true fetch --progress "$REMOTE" "+$refsp:$remotes_local_ref" 2>&1)
+#                 # output=$(GIT_PROGRESS_DELAY=0 \
+#                 #     git -c pack.useStderr=false \
+#                 #         -c core.progress=true \
+#                 #         fetch --progress "$REMOTE" "+$refsp:$remotes_local_ref" 2>&1)
+                
+#                 # total_output="$total_output\nRemotes:\n$output"
+#                 total_output="$total_output"$'\n'"Remotes:"$'\n'"$output"
+
+#             fi
+#         fi
+#     fi
+# done <<< $remote_refs
+
+# Delete refs 
+# for unrefs in `git show-ref | grep -iE "refs/remotes/[a-zA-Z0-9]+/groupConv" | awk -F' ' '{print $2}'`; do 
+#     # echo $unrefs
+#     git update-ref -d $unrefs
+# done
+
+# # all_output="$total_output\nTrees: $some_res"
+# # all_output="$total_output"$'\nTrees: '"$some_res"
+# # echo -e "$all_output"
+# echo -e "$total_output"
+
