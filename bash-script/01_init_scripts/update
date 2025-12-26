@@ -1,0 +1,44 @@
+# This is update githook script
+#!/bin/bash
+
+refname="$1"
+oldrev="$2"
+newrev="$3"
+#echo $oldrev $newrev
+
+# get current local peer name
+LOCAL=`cat .author-cb/git-cb`
+EMAIL="$LOCAL@unibas.ch"
+
+# Read pub-key
+sha_pubkey=`cat .author-cb/key.pub | sha1sum | awk '{print $1}'`
+
+# check for keys
+if [[ $refname == *"/pubKey/"* ]]; then
+   dir_newrev=${newrev:0:2}
+   file_newrev=${newrev:2}
+   # split refname
+   hash_pub_key=`echo $refname | awk -F/ '{print $4}'`
+   pub_key=`git show -s $newrev --format="%B"`
+   compute_hash_key=`echo $pub_key | sha1sum | awk '{print $1}'`
+   echo $hash_pub_key,  $compute_hash_key
+   if [[ "$hash_pub_key" == "$compute_hash_key" ]]; then
+      echo "So far good, now check if it's signed or not?"      
+
+      # add keys in allowed signer file
+      echo $pub_key | awk '{ print $3 " " $1 " " $2 }' >> .author-cb/allowed_signers
+      check_signed=`git show -s $newrev --format="%G?"`
+
+      if [[ $check_signed == "G" ]]; then
+         echo "Received key '$refname' is valid."
+         exit 0
+      else
+         echo "Keys are not signed and valid, Therefore deleting objects"
+         rm -rvf objects/$dir_newrev/$file_newrev
+      fi
+   else
+      echo "something fishy about the hashes"
+      echo "deleteding ref. and objects"
+      rm -rvf objects/$dir_newrev/$file_newrev
+   fi
+fi
