@@ -1,0 +1,13 @@
+[package]
+name = "_5_merge_group_state"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "merge_group_state"
+path = "src/main.rs"
+
+[dependencies]
+git2 = "0.20.2"
+sha1 = "0.10.6"
+ssh-key = { version = "0.6.7", features = ["rsa", "ed25519"] }

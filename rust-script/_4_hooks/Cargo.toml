@@ -1,0 +1,17 @@
+[package]
+name = "_4_hooks"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name="update"
+path="src/1_update/main.rs"
+
+[[bin]]
+name="post-receive"
+path="src/2_post_receive/main.rs"
+
+[dependencies]
+git2 = "0.20.2"
+sha1 = "0.10.6"
+ssh-key = { version = "0.6", features = ["ed25519", "rsa"] }

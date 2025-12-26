@@ -1,0 +1,37 @@
+[package]
+name = "_2_group_ops_api"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name="create_group"
+path="src/1_create_group/main.rs"
+
+[[bin]]
+name="add_member"
+path="src/2_add_member/main.rs"
+
+[[bin]]
+name="remove_member"
+path="src/3_remove_member/main.rs"
+
+[[bin]]
+name="rename_group"
+path="src/4_rename_group/main.rs"
+
+[[bin]]
+name="promote"
+path="src/5_promote/main.rs"
+
+[[bin]]
+name="demote"
+path="src/6_demote/main.rs"
+
+[[bin]]
+name="send_grp_msg"
+path="src/7_send_group_message/main.rs"
+
+[dependencies]
+git2 = "0.20.2"
+sha1 = "0.10.6"
+ssh-key = { version = "0.6", features = ["ed25519", "rsa"] }

@@ -1,0 +1,22 @@
+[package]
+name = "_3_git_utility"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name="add_remote"
+path="src/add_remote/main.rs"
+
+[[bin]]
+name="push_key"
+path="src/push_key/main.rs"
+
+[[bin]]
+name="push_group"
+path="src/push_group/main.rs"
+
+
+[dependencies]
+git2 = "0.20.2"
+sha1 = "0.10.6"
+ssh-key = { version = "0.6", features = ["ed25519", "rsa"] }

@@ -1,0 +1,15 @@
+[package]
+name = "_1_repo_init"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name="repo_init"
+path="src/main.rs"
+
+
+[dependencies]
+git2 = "0.20.2"
+regex = "1.11.1"
+sha1 = "0.10.6"
+ssh-key = { version = "0.6", features = ["ed25519", "rsa"] }
