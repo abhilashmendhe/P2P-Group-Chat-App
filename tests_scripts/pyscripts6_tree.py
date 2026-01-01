@@ -191,7 +191,7 @@ def change_group_name(gname, new_name, new_desc, capture_output=True, text=True,
 def run_simulation_add(start, end, gname, arr, f: _io.TextIOWrapper):
 
     for i in range(start, end):
-        num_msgs = random.randint(1, 5)
+        num_msgs = random.randint(1, 4)
         for _ in range(num_msgs):
             # send message
             rand_msg = random.choice(sms_messages)
@@ -260,10 +260,10 @@ def run_sim(peer_name: str):
     
     # 2.1 Add half members 
     start = 0
-    end = 64 
+    end = 116
     if peer_name == "peer1" or peer_name == "peer2" or peer_name == "peer3":
         start = 0
-        end = start + 64
+        end = start + 116
     elif peer_name == "peer4" or peer_name == "peer5" or peer_name == "peer6" or peer_name == "peer7":
         start = 124
         end = start + 64 
@@ -271,7 +271,7 @@ def run_sim(peer_name: str):
         start = 248
         end = start + 64
     
-    arr = random.sample(range(start, end), 64)
+    arr = random.sample(range(start, end), 116)
     rdarr = copy.deepcopy(arr)
     print(f"Adding {end-start} members in group: {group_name}")
     run_simulation_add(start, end, group_name, arr, f)
@@ -309,9 +309,9 @@ def run_sim(peer_name: str):
     time.sleep(2)
     # # 2.6 Add only one group member
     start3 = end2 + 1
-    end3 = start3 + 140
+    end3 = start3 + 110
     print("start3: ",start3, "end3:",end3)
-    arr = random.sample(range(start3, end3), 120)
+    arr = random.sample(range(start3, end3), 100)
     print(f"Re-adding {len(arr)} random members in the group: {group_name}")
     run_simulation_add(start3, end3, group_name, arr, f)
 
