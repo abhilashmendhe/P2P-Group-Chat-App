@@ -16,6 +16,7 @@ This _readme_ file consists the task and/or additional work that is needed to be
    - [ ] Talk about the group memberships of different chat applications that supports group operations. Write about the size of group, the admin removal etc.
    - [ ] Add anti-entropy and gossip protocol theory.
    - [ ] In anti-entopy, discuss, SI model. Push, pull, and push-pull ways.
+   - [ ] Add topologies
 
 3. **Chapter 3 - Design**
     Will add extra if any changes are required...
