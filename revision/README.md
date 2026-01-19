@@ -60,6 +60,7 @@ This _readme_ file consists the task and/or additional work that is needed to be
    - [ ] In future work, talk about when pushing a loarge group state object to a newly added member in the group. (communication overhead..). In git, we can stash the commits, and send a single commit object. Or
    work on pruning techniques. If not using git based app, add the messages on  IPFS or S3 objects, and only send those history of messages required by peer.
    - [ ] Secure CRDTs. (matrix protocol to secure communication). Also talk about how ssh git can secure transfering git objects by connecting git repos by ssh. When talking about ssh, say that it could be unsafe to perform ssh login, so disabling it or create the application in another user profile userspace or into docker vms. 
+   - [ ] primary advantage of using SSH keys are that Often eliminates the need to repeatedly enter credentials for operations like pushing code after initial setup.
    - [ ] Talk about byzantine nodes, can change the commit messages.. etc etc.
    - [ ] First talk about in-sufficient public ips for each git repo. One way to optimize is to let have private ip, but use WebRTC (stun, relays) to communicate globally.
    - [ ] Talk about how routing can be added for efficient routing. like kademilia.

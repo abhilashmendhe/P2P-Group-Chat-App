@@ -30,17 +30,22 @@ fi
 apath=""
 
 if [[ $arch == "mesh" ]]; then
-    apath=$SCRIPTDIR/../mesh-arch-testing
+    # apath=$SCRIPTDIR/../mesh-arch-testing
+    apath=$SCRIPTDIR/../single/mesh
 else 
-    apath=$SCRIPTDIR/../tree-arch-testing
+    # apath=$SCRIPTDIR/../tree-arch-testing
+    apath=$SCRIPTDIR/../single/tree
 fi
 
 if [[ $mode == "pull" ]]; then 
-    apath="$apath/pull2"
+    apath="$apath/pull"
 else 
-    apath="$apath/pull-push2"
+    apath="$apath/pull-push"
 fi 
 
+echo $apath
+echo `ls $apath`
+# exit 1
 # clean1="`sed 's/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/\n&\n/g'`"
 
 for ks in `ls $apath`;do 
@@ -49,16 +54,28 @@ for ks in `ls $apath`;do
         if [[ $peer == "stats.log" ]]; then 
             continue
         fi 
-        pull_log=$apath/$ks/$peer/"$peer"_PULL.log
+        if [[ $arch == "mesh" ]]; then
+            pull_log=$apath/$ks/$peer/"$peer"_PULL.log
+            pull_path=$apath/$ks/$peer
+        else
+            if [[ $peer == *"ops"* || $peer == *"PUSH"* ]]; then
+                continue
+            fi
+            pull_log=$apath/$ks/$peer
+            pull_path=$apath/$ks
+        fi
+        echo $pull_log
+        echo $pull_path
+        # continue
         # cat $pull_log
-        sed 's/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/\n&\n/g' $pull_log > $apath/$ks/$peer/clean_pull1.log
-        sed 's/Remotes ->/\n\n&/g' $apath/$ks/$peer/clean_pull1.log > $apath/$ks/$peer/clean_pull2.log
-        sed -E 's/remote: (Counting|Compressing) objects: [0-9]+% \([0-9]+\/[0-9]+\)//g; s/\n+/ /g' $apath/$ks/$peer/clean_pull2.log > $apath/$ks/$peer/clean_pull3.log
-        sed -E $'s/\x1b\\[K//g' $apath/$ks/$peer/clean_pull3.log > $apath/$ks/$peer/clean_pull4.log
-        sed 's/Remotes -> NO OUTPUT NO CHANGE//g' $apath/$ks/$peer/clean_pull4.log > $apath/$ks/$peer/clean_pull5.log
-        sed -E 's/^, done. /\n&\n/g' $apath/$ks/$peer/clean_pull5.log > $apath/$ks/$peer/clean_pull6.log
-        sed -E 's/^, done. //g' $apath/$ks/$peer/clean_pull6.log > $apath/$ks/$peer/clean_pull7.log
-        sed -E 's/^ +//; s/ +$//; /^\s*$/d;' $apath/$ks/$peer/clean_pull7.log > $apath/$ks/$peer/clean_pull8.log
+        sed 's/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx/\n&\n/g' $pull_log > $pull_path/clean_pull1.log
+        sed 's/Remotes ->/\n\n&/g' $pull_path/clean_pull1.log > $pull_path/clean_pull2.log
+        sed -E 's/remote: (Counting|Compressing) objects: [0-9]+% \([0-9]+\/[0-9]+\)//g; s/\n+/ /g' $pull_path/clean_pull2.log > $pull_path/clean_pull3.log
+        sed -E $'s/\x1b\\[K//g' $pull_path/clean_pull3.log > $pull_path/clean_pull4.log
+        sed 's/Remotes -> NO OUTPUT NO CHANGE//g' $pull_path/clean_pull4.log > $pull_path/clean_pull5.log
+        sed -E 's/^, done. /\n&\n/g' $pull_path/clean_pull5.log > $pull_path/clean_pull6.log
+        sed -E 's/^, done. //g' $pull_path/clean_pull6.log > $pull_path/clean_pull7.log
+        sed -E 's/^ +//; s/ +$//; /^\s*$/d;' $pull_path/clean_pull7.log > $pull_path/clean_pull8.log
         
         # break
         

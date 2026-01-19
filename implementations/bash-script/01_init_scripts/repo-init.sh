@@ -2,7 +2,12 @@
 SCRIPTDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd )"
 
 REPOPATH=$1
-NAME=$2
+NAME=$1
+EMAIL=$2
+
+# echo $REPOPATH
+# echo $NAME
+# echo $EMAIL
 
 if [ -z $REPOPATH ]; then 
     echo "Empty repository path '$REPOPATH'" >&2
@@ -18,17 +23,55 @@ if [ -z $NAME ]; then
     NAME=$REPOPATH
 fi
 
+if [ -z $EMAIL ]; then
+    echo "Empty email. Pass email as second argument" >&2
+    exit 1
+fi 
+
 if echo "$NAME" | grep -e "[^a-zA-Z0-9]" 2>/dev/null; then
     echo "Invalid repository name '$NAME', must only contain alphanumeric characters" >&2
     exit 1 
 fi
+
+# First generate keys and store them into a tmp folder
+TEMP_KEYS_PATH=$(ls /tmp | grep "p2p_client" | awk 'NR==1 {print}')
+
+#echo "temp keys path : $TEMP_KEYS_PATH"
+if [ -z "$TEMP_KEYS_PATH" ]; then
+    TEMP_KEYS_PATH=$(mktemp -d /tmp/p2p_client.XXXXXX)
+else
+    TEMP_KEYS_PATH="/tmp/$TEMP_KEYS_PATH"
+fi
+
+
+ssh-keygen -t rsa -b 1024 -N "" -C "$email" -f "$TEMP_KEYS_PATH/key" -q <<< y 1>/dev/null
+chmod 600 "$TEMP_KEYS_PATH/key"
+chmod 644 "$TEMP_KEYS_PATH/key.pub"
+
+shaPubKey=`cat "$TEMP_KEYS_PATH/key.pub" | sha1sum | awk '{print $1}'`
+echo $shaPubKey
+
+REPOPATH="$REPOPATH-$shaPubKey"
+NAME="$NAME-$shaPubKey"
 
 # Intialize an empty git repo
 git init $REPOPATH 2>/dev/null
 
 # Create a directory to store replica/user info.
 mkdir -p $REPOPATH/.git/.author-cb
+
+# Copy keys
+cp "$TEMP_KEYS_PATH/key" $REPOPATH/.git/.author-cb/key
+cp "$TEMP_KEYS_PATH/key.pub" $REPOPATH/.git/.author-cb/key.pub 
+
+# Remove the temp keys folder
+rm -rf "$TEMP_KEYS_PATH"
+
+# Store the name of the repo/author in git-cb file
 echo "$NAME" >  $REPOPATH/.git/.author-cb/git-cb
+
+# Store the email of the author in git-cb-email file
+echo "$EMAIL" >  $REPOPATH/.git/.author-cb/git-cb-email
 
 # Create csv files in .git/.author-cb
 touch $REPOPATH/.git/.author-cb/db.csv
@@ -37,12 +80,7 @@ echo "id,new_g_name,old_g_name,group_state_tree,created" > $REPOPATH/.git/.autho
 # e.g. 23212,hiking,"old_picnic_old",5a821b,"local/remote"
 
 # Email
-email="$NAME@unibas.ch"
-
-# creating keys with ssh-keygen
-ssh-keygen -t rsa -b 1024 -N "" -C $email -f $REPOPATH/.git/.author-cb/key 1>/dev/null
-chmod 600 $REPOPATH/.git/.author-cb/key
-chmod 644 $REPOPATH/.git/.author-cb/key.pub
+email=$EMAIL
 
 # Start SSH agent
 eval `ssh-agent`
