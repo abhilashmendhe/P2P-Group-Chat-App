@@ -28,8 +28,13 @@ pub fn add_member_func(
             remote_member_value += 1;
         }
 
-        format!("{},{}", remote_member_value, &remote_blob_split[1])
+        let mut remote_admin_value = remote_blob_split[1].parse::<u16>()
+                                    .expect("Failed to parse the remote member value to u16");
+        if remote_admin_value % 2 == 1 {
+            remote_admin_value += 1;
+        }
 
+        format!("{},{}", remote_member_value, remote_admin_value)
     } else {
         String::from("1,0")
     }

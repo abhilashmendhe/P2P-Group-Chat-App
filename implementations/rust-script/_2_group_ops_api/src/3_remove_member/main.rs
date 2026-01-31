@@ -54,9 +54,11 @@ fn main() {
 
     // 5. Check if local is admin
     let local_path_str = format!("{}/{}",group_id, local_peer_name);
-    if !if_peer_admin(&repo, &curr_index, &local_path_str) {
-        println!("`{}` does not exists OR is not an admin of the group `{}`. Can't perform 'remove' operation.",local_peer_name,group_name); 
-        exit(1);
+    if local_peer_name != *remote_name {
+        if !if_peer_admin(&repo, &curr_index, &local_path_str) {
+            println!("`{}` does not exists OR is not an admin of the group `{}`. Can't perform 'remove' operation.",local_peer_name,group_name); 
+            exit(1);
+        }
     }
     
     // 6. Check if remote peer already exists in the group
