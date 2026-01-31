@@ -86,12 +86,15 @@ for member in `git show -s $group_state_tree:$GROUP_ID`; do
     
     if [[ $((is_member % 2)) -eq 1 ]]; then
         members+="$member, "
+	if [[ $((is_admin % 2 )) -eq 1 ]]; then
+            admins+="$member, "
+    	fi
     else 
         removed+="$member, "
     fi
-    if [[ $((is_admin % 2 )) -eq 1 ]]; then 
-        admins+="$member, "
-    fi
+    #if [[ $((is_admin % 2 )) -eq 1 ]]; then 
+    #    admins+="$member, "
+    #fi
 done
 
 g_heading="\033[1;94m$g_name\033[0m ($SUB_GROUP_ID) ['\033[4;96m$g_desc\033[0m']"

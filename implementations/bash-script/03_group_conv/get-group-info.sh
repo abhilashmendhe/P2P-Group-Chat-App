@@ -2,7 +2,7 @@
 
 SCRIPTDIR="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd )"
 
-if ! $SCRIPTDIR/../repo-valid.sh '.'; then
+if ! $SCRIPTDIR/repo-valid.sh '.'; then
     exit 1
 fi
 
@@ -14,6 +14,8 @@ fi
 # fi
 ################### Get group info ##################
 #####################################################
+
+WITH_MESSAGE=$1
 
 all_groups=`cat .git/.author-cb/db.csv`
 
@@ -61,7 +63,7 @@ SUB_GROUP_ID=${GROUP_ID:0:12}
 # echo $SUB_GROUP_ID
 #commits_hash=`git show-ref | grep -E "/$SUB_GROUP_ID/" | awk '{print $1}'`
 commits_hash=`git show-ref | grep -E "/$SUB_GROUP_ID/" | grep -E heads | awk '{print $1}'`
-group_state_tree=`git show -s $commits_hash --format="%T" -1`
+group_state_tree=`git show -s $commits_hash --format="%T" -1 | tail -n 1`
 
 # echo $commits_hash
 g_name=`git cat-file -p $group_state_tree:group_name`
@@ -84,12 +86,15 @@ for member in `git show -s $group_state_tree:$GROUP_ID`; do
     
     if [[ $((is_member % 2)) -eq 1 ]]; then
         members+="$member, "
+	if [[ $((is_admin % 2 )) -eq 1 ]]; then
+            admins+="$member, "
+    	fi
     else 
         removed+="$member, "
     fi
-    if [[ $((is_admin % 2 )) -eq 1 ]]; then 
-        admins+="$member, "
-    fi
+    #if [[ $((is_admin % 2 )) -eq 1 ]]; then 
+    #    admins+="$member, "
+    #fi
 done
 
 g_heading="\033[1;94m$g_name\033[0m ($SUB_GROUP_ID) ['\033[4;96m$g_desc\033[0m']"
@@ -106,8 +111,10 @@ echo
 # echo "Sub group id: $SUB_GROUP_ID"
 # group_show_ref=`git show-ref | grep $SUB_GROUP_ID`
 # echo $group_show_ref
-
-
+echo $WITH_MESSAGE
+if [[ -z $WITH_MESSAGE ]];then
+    exit 0
+fi
 ######
 # Set colors
 ######
@@ -134,12 +141,13 @@ done
 # for msgs in `git log $join_commit_ids --topo-order --reverse --pretty=format:"Author: %an%nMessage: %s%n"`; do 
 #     echo $msgs
 # done
+#
 
 echo "Messages"
 echo "--------------------------------------------"
 echo ""
-git log $join_commit_ids --pretty=format:"%an|%B" --topo-order --reverse | while IFS='|' read -r author message; do
-
+{ git log --no-show-signature $join_commit_ids --pretty=format:"%an|%B" --topo-order --reverse; echo; } | while IFS='|' read -r author message; do
+    
     if [[ ! -z $author ]];then
         if [[ "$message" == *"GROUP_OPS"* ]]; then
             # echo "$author: $message" "group ops"
