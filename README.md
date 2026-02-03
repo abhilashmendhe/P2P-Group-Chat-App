@@ -4,6 +4,8 @@
 
 An **offline P2P group messaging application** designed for small community groups, where the app is independent of central servers.
 
+> 🎓 This project was part of my **MSc Thesis at the University of Basel, Switzerland**.
+
 ---
 
 ## 🧭 Overview
