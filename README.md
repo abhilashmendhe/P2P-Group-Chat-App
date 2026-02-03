@@ -47,7 +47,7 @@ The repository is organized as follows:
 
 The idea is to build a consensus-free **P2P Group Chat** using CRDTs [1.]. Our core focus was on group membership model, designing group operations APIs like add/remove member etc. can be found in **[implementations](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/implementations)/** README file. And, how do the group state converges without needing a consensus. Therefore, we used CRDTs [2., 3.].
 
-#### Implementation Design
+### Implementation Design
 
 We embedded our CRDTs in the Git objects. Our idea of implmentation is similar to *Merkle-CRDTs* [4.], but we don't build our own *Merkle-DAG* from scratch, instead we use *Git*. 
 
