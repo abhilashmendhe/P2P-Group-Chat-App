@@ -1,10 +1,9 @@
 # 📡  P2P Offline Group Messaging App
 
-<!-- This is the repo that consist codes for my *P2P Decentralized Offline Group Chat App* which is my MSc Thesis from University of Basel, CH. -->
-
 An **offline P2P group messaging application** designed for small community groups, where the app is independent of central servers.
 
-> 🎓 This project was part of my **MSc Thesis at the University of Basel, Switzerland**.
+> 🎓 This project was part of my **MSc Thesis at the University of Basel, CH**.
+<!-- > 🎓 This project was part of my **MSc Thesis under [Computer Networks Group](https://cn.dmi.unibas.ch/en/) at the University of Basel, CH**. -->
 
 ---
 
@@ -44,25 +43,36 @@ The repository is organized as follows:
 
 <!-- --- -->
 
-<!-- ## Description
-This section provides additional details about the project, including its design, assumptions, and scope.  
-It may cover:
-- System model and architecture
-- Core algorithms or protocols
-- Implementation details
-- Experimental setup and evaluation methodology
-- Limitations and future work -->
+## Illustration
 
-<!-- ## References
-[1] <Author>, *Title*, <Venue>, <Year>.  
-    Available at: <URL> -->
+The idea is to build a consensus-free **P2P Group Chat** using CRDTs [1.]. Our core focus was on group membership model, designing group operations APIs like add/remove member etc. can be found in **[implementations](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/implementations)/** README file. And, how do the group state converges without needing a consensus. Therefore, we used CRDTs [2., 3.].
+
+#### Implementation Design
+
+We embedded our CRDTs in the Git objects. Our idea of implmentation is similar to *Merkle-CRDTs* [4.], but we don't build our own *Merkle-DAG* from scratch, instead we use *Git*. 
+
+<img src="images/group-state-commit-object.png" style="display: block; margin: 0 auto; width: 84%;">
+
+- Above is the structural representation of mapping CRDTs to *Git objects*. 
+- Each commit is like a message exchanged between group users that points to a *tree object*.
+- The *tree object* pointed by the *commit* stores group information like group name, and description. This *tree object* itself points to another *tree object*.
+- The *second tree object* stores the *members*, and each member value is like a tuple(size=2) which is our grow-only counters. The *first tuple value* indicates the presence of a member where as the *second tuple value* denotes the admin presence.
+- Each commit object is pointed by *git reference*. If a group has N members, then each group will have N references.
+
+The above design is just a high level design and we won't go much into detail explanation.
+
+## References
+1. *Marc Shapiro, Nuno Preguiça, Carlos Baquero, and Marek Zawirski*, **Conflict-free replicated data types**. URL: https://arxiv.org/abs/1805.06358, 2011.
+1. *Weihai Yu and Sigbjørn Rosta*, **A Low-Cost Set CRDT Based on Causal Lengths**. URL: https://nva.sikt.no/registration/0198cc5de8b2-ae7d8d7f-4359-4729-a7c0-46e59e059714, 2020.
+1. *Erick Lavoie*, **State-based ∞p-set conflict-free replicated data type**. URL: https://arxiv.org/abs/2304.01929, 2023.
+1. *Hector Sanjuan, Samuli Poyhtari, Pedro Teixeira, Ioannis Psaras*, **Merkle-CRDTs: Merkle-DAGs meet CRDTs**. URL: https://arxiv.org/abs/2004.00107, 2020. 
 
 ## 📌 Repository Notice
 
 - This repository is a continuation of the following **archived repository**:
     - [Thesis-crdt-bash](https://github.com/abhilashmendhe/Thesis-crdt-bash)  
     - [Thesis-CRDT-Scripts](https://github.com/abhilashmendhe/Thesis-CRDT-Scripts) 
-    * Moreover, this repository contains additional codes which were not pushed in the archive repositories.
+- Moreover, this repository contains additional codes which were not pushed in the archived repositories.
 
 - Additional code and improvements that were **not included in the archived repositories** are available here.
 
