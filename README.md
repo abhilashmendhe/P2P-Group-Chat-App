@@ -45,11 +45,11 @@ The repository is organized as follows:
 
 ## Illustration
 
-The idea is to build a consensus-free **P2P Group Chat** using CRDTs [1.]. Our core focus was on group membership model, designing group operations APIs like add/remove member etc. can be found in **[implementations](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/implementations)/** README file. And, how do the group state converges without needing a consensus. Therefore, we used CRDTs [2., 3.].
+The idea is to build a consensus-free **P2P Group Chat** using CRDTs [[1.](#ref-1)]. Our core focus was on group membership model, designing group operations APIs like add/remove member etc. can be found in **[implementations](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/implementations)/** README file. And, how do the group state converges without needing a consensus. Therefore, we used CRDTs [[2.](#ref-2), [3.](#ref-3)].
 
 ### Implementation Design
 
-We embedded our CRDTs in the Git objects. Our idea of implmentation is similar to *Merkle-CRDTs* [4.], but we don't build our own *Merkle-DAG* from scratch, instead we use *Git*. 
+We embedded our CRDTs in the Git objects. Our idea of implmentation is similar to *Merkle-CRDTs* [[4.](#ref-4)], but we don't build our own *Merkle-DAG* from scratch, instead we use *Git*. 
 
 <img src="images/group-state-commit-object.png" style="display: block; margin: 0 auto; width: 84%;">
 
@@ -62,10 +62,10 @@ We embedded our CRDTs in the Git objects. Our idea of implmentation is similar t
 The above design is just a high level design and we won't go much into detail explanation.
 
 ## References
-1. *Marc Shapiro, Nuno Preguiça, Carlos Baquero, and Marek Zawirski*, **Conflict-free replicated data types**. URL: https://arxiv.org/abs/1805.06358, 2011.
-1. *Weihai Yu and Sigbjørn Rosta*, **A Low-Cost Set CRDT Based on Causal Lengths**. URL: https://nva.sikt.no/registration/0198cc5de8b2-ae7d8d7f-4359-4729-a7c0-46e59e059714, 2020.
-1. *Erick Lavoie*, **State-based ∞p-set conflict-free replicated data type**. URL: https://arxiv.org/abs/2304.01929, 2023.
-1. *Hector Sanjuan, Samuli Poyhtari, Pedro Teixeira, Ioannis Psaras*, **Merkle-CRDTs: Merkle-DAGs meet CRDTs**. URL: https://arxiv.org/abs/2004.00107, 2020. 
+1. <a id="ref-1"></a> *Marc Shapiro, Nuno Preguiça, Carlos Baquero, and Marek Zawirski*, **Conflict-free replicated data types**. URL: https://arxiv.org/abs/1805.06358, 2011.
+1. <a id="ref-2"></a> *Weihai Yu and Sigbjørn Rosta*, **A Low-Cost Set CRDT Based on Causal Lengths**. URL: https://nva.sikt.no/registration/0198cc5de8b2-ae7d8d7f-4359-4729-a7c0-46e59e059714, 2020.
+1. <a id="ref-3"></a> *Erick Lavoie*, **State-based ∞p-set conflict-free replicated data type**. URL: https://arxiv.org/abs/2304.01929, 2023.
+1. <a id="ref-4"></a> *Hector Sanjuan, Samuli Poyhtari, Pedro Teixeira, Ioannis Psaras*, **Merkle-CRDTs: Merkle-DAGs meet CRDTs**. URL: https://arxiv.org/abs/2004.00107, 2020. 
 
 ## 📌 Repository Notice
 
