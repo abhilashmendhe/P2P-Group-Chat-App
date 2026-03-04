@@ -61,6 +61,8 @@ We embedded our CRDTs in the Git objects. Our idea of implmentation is similar t
 
 The above design is just a high level design and we won't go much into detail explanation.
 
+My report can be found here **[my-report](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/my-report)/**
+
 ## References
 1. <a id="ref-1"></a> *Marc Shapiro, Nuno Preguiça, Carlos Baquero, and Marek Zawirski*, **Conflict-free replicated data types**. URL: https://arxiv.org/abs/1805.06358, 2011.
 1. <a id="ref-2"></a> *Weihai Yu and Sigbjørn Rosta*, **A Low-Cost Set CRDT Based on Causal Lengths**. URL: https://nva.sikt.no/registration/0198cc5de8b2-ae7d8d7f-4359-4729-a7c0-46e59e059714, 2020.
