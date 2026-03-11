@@ -40,7 +40,10 @@ The repository is organized as follows:
 - **[deployment-scripts](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/deployment-scripts)/**  
   - Bash scripts for deploying multiple peers using **Docker**, primarily for experimentation and evaluation.
   - Experimental test setups.
-
+  
+- **[my-report](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/my-report)**
+  - My MSc report. 
+  
 <!-- --- -->
 
 ## Illustration
