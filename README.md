@@ -33,13 +33,12 @@ The repository is organized as follows:
   - **Bash**
   - **Rust**
 
-- **[helper-scripts](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/helper-scripts)/** 
-  Includes scripts used during evaluation and testing, as well as:
-  - Analysis and measurement scripts  
-
-- **[deployment-scripts](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/deployment-scripts)/**  
-  - Bash scripts for deploying multiple peers using **Docker**, primarily for experimentation and evaluation.
-  - Experimental test setups.
+- **[evaluation-scripts](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/evalution-scripts)/**
+  Contains testing scripts for the evaluation of this project. There are two sub-folders:
+  - **[Exp 1](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/evalution-scripts/exp1)**
+  - **[Exp 2](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/evalution-scripts/exp2)**
+  
+  More files are added related to data cleaning, and plot functions in the sub-folders of the evaluation-scripts folder.
   
 - **[my-report](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/my-report)/**
   - My MSc report. 
