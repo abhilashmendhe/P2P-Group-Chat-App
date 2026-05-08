@@ -1,4 +1,4 @@
-# 🚀 Peer Docker <img src="https://www.docker.com/wp-content/uploads/2022/03/Moby-logo.png" alt="Docker Logo" width="40" height="30" /> and Git <img src="https://git-scm.com/images/logos/downloads/Git-Logo-2Color.png" alt="Git Logo" width="65" /> Setup Guide
+# 🚀 Peer Docker <img src="./images/Moby-logo.png" alt="Docker Logo" width="40" height="30" /> and Git <img src="./images/git.png" alt="Git Logo" width="40" height="32" /> Setup Guide
 </p>
 
 <p align="center">
