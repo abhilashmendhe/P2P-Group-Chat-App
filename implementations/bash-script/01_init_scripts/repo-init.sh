@@ -48,7 +48,7 @@ ssh-keygen -t rsa -b 1024 -N "" -C "$email" -f "$TEMP_KEYS_PATH/key" -q <<< y 1>
 chmod 600 "$TEMP_KEYS_PATH/key"
 chmod 644 "$TEMP_KEYS_PATH/key.pub"
 
-shaPubKey=`cat "$TEMP_KEYS_PATH/key.pub" | sha1sum | awk '{print $1}'`
+shaPubKey=`cat "$TEMP_KEYS_PATH/key.pub" | sha256sum | awk '{print $1}'`
 echo $shaPubKey
 
 REPOPATH="$REPOPATH-$shaPubKey"
@@ -115,7 +115,7 @@ pubKeyCommitHash=$(cat .git/.author-cb/key.pub |
 
 
 # Create a hash of author's pub-key
-shaPubKey=`cat .git/.author-cb/key.pub | sha256sum | awk '{print $1}'`
+shaPubKey=`cat .git/.author-cb/key.pub | sha1sum | awk '{print $1}'`
 
 git update-ref refs/heads/pubKey/$shaPubKey $pubKeyCommitHash
 
