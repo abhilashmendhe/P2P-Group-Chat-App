@@ -115,7 +115,7 @@ pubKeyCommitHash=$(cat .git/.author-cb/key.pub |
 
 
 # Create a hash of author's pub-key
-shaPubKey=`cat .git/.author-cb/key.pub | sha1sum | awk '{print $1}'`
+shaPubKey=`cat .git/.author-cb/key.pub | sha256sum | awk '{print $1}'`
 
 git update-ref refs/heads/pubKey/$shaPubKey $pubKeyCommitHash
 
