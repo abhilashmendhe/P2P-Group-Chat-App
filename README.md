@@ -40,6 +40,9 @@ The repository is organized as follows:
   
   More files are added related to data cleaning, and plot functions in the sub-folders of the evaluation-scripts folder.
   
+- **[functional-testing](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/functional-testing)/**
+  Contains scripts that tests the working of our group chat application to ensure that all features operated according to the specified requirements.
+
 - **[my-report](https://github.com/abhilashmendhe/P2P-Group-Chat-App/tree/main/my-report)/**
   - My MSc report. 
   
